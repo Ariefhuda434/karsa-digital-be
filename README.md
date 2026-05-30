@@ -7,7 +7,6 @@ Backend API untuk website Karsa Digital (Laravel + PostgreSQL).
 - **Laravel 11**
 - **PostgreSQL**
 - **PHP 8.3**
-- Docker (nginx + php-fpm)
 
 ## ✨ Fitur API
 - CRUD Project / Portofolio
