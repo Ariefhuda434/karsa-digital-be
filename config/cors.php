@@ -5,7 +5,7 @@ return [
     'allowed_methods' => ['*'],
     'allowed_origins' => [
         'http://localhost:5173',
-        'https://karsa-web.netlify.app', // ganti dengan URL Netlify kamu
+        'https://kodinginrep.netlify.app'
     ],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
