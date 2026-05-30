@@ -2,8 +2,5 @@
   "php": {
     "version": "8.4",
     "extensions": ["pdo_pgsql", "pgsql", "mbstring", "openssl", "tokenizer", "xml", "ctype", "json", "bcmath"]
-  },
-  "deploy": {
-    "startCommand": "php artisan migrate --force && frankenphp run --config /Caddyfile"
   }
 }
