@@ -38,3 +38,5 @@ php artisan storage:link
 
 # Jalankan server
 php artisan serve
+
+jadi gini
