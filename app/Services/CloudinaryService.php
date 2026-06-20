@@ -24,9 +24,8 @@ class CloudinaryService
     {
         $timestamp = time();
         $params = [
-            'timestamp'     => $timestamp,
-            'folder'        => $folder,
-            'resource_type' => 'image',
+            'timestamp' => $timestamp,
+            'folder'    => $folder,
         ];
 
         $params['signature'] = $this->generateSignature($params);
@@ -51,9 +50,8 @@ class CloudinaryService
 
         $timestamp = time();
         $params = [
-            'timestamp'     => $timestamp,
-            'public_id'     => $publicId,
-            'resource_type' => 'image',
+            'timestamp' => $timestamp,
+            'public_id' => $publicId,
         ];
 
         $params['signature'] = $this->generateSignature($params);
