@@ -21,6 +21,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/orders/{order}',          [OrderController::class, 'show']);
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
 
+    Route::get('/feedbacks',               [FeedbackController::class, 'adminIndex']);
     Route::get('/feedbacks/{feedback}',    [FeedbackController::class, 'show']);
     Route::patch('/feedbacks/{feedback}',  [FeedbackController::class, 'update']);
 

@@ -9,6 +9,11 @@ class FeedbackController extends Controller
 {
     public function index()
     {
+        return response()->json(Feedback::where('is_featured', true)->latest()->get());
+    }
+
+    public function adminIndex()
+    {
         return response()->json(Feedback::latest()->get());
     }
 
