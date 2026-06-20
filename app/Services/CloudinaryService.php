@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\UploadedFile;
 
 class CloudinaryService
@@ -28,27 +27,41 @@ class CloudinaryService
     public function upload(UploadedFile $file, string $folder = 'projects'): ?string
     {
         $timestamp = time();
-        $params = [
-            'timestamp' => $timestamp,
+        $fields = [
+            'timestamp' => (string) $timestamp,
             'folder'    => $folder,
         ];
 
-        $params['signature'] = $this->generateSignature($params);
-        $params['api_key']   = $this->apiKey;
+        $fields['signature'] = $this->generateSignature($fields);
+        $fields['api_key']   = $this->apiKey;
 
-        $response = Http::asMultipart()
-            ->attach('file', $file->get(), $file->getClientOriginalName())
-            ->post("{$this->baseUrl}/image/upload", $params);
+        $curlFile = new \CurlFile($file->getRealPath(), $file->getMimeType(), $file->getClientOriginalName());
+        $fields['file'] = $curlFile;
 
-        if ($response->failed()) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "{$this->baseUrl}/image/upload");
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+
+        $raw = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($curlError || $httpCode >= 400) {
             \Log::error('Cloudinary upload failed', [
-                'status' => $response->status(),
-                'body'   => $response->body(),
+                'http_code'  => $httpCode,
+                'curl_error' => $curlError,
+                'response'   => $raw,
             ]);
             return null;
         }
 
-        return $response->json('secure_url');
+        $data = json_decode($raw, true);
+        return $data['secure_url'] ?? null;
     }
 
     public function delete(string $url): bool
@@ -57,17 +70,29 @@ class CloudinaryService
         if (!$publicId) return false;
 
         $timestamp = time();
-        $params = [
-            'timestamp' => $timestamp,
+        $fields = [
+            'timestamp' => (string) $timestamp,
             'public_id' => $publicId,
         ];
 
-        $params['signature'] = $this->generateSignature($params);
-        $params['api_key']   = $this->apiKey;
+        $fields['signature'] = $this->generateSignature($fields);
+        $fields['api_key']   = $this->apiKey;
 
-        $response = Http::asForm()->post("{$this->baseUrl}/image/destroy", $params);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "{$this->baseUrl}/image/destroy");
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
-        return $response->successful() && $response->json('result') === 'ok';
+        $raw = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode >= 400) return false;
+
+        $data = json_decode($raw, true);
+        return ($data['result'] ?? null) === 'ok';
     }
 
     protected function generateSignature(array $params): string
