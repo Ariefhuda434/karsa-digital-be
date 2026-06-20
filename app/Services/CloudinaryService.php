@@ -20,6 +20,11 @@ class CloudinaryService
         $this->baseUrl   = "https://api.cloudinary.com/v1_1/{$this->cloudName}";
     }
 
+    public function credentialsValid(): bool
+    {
+        return $this->cloudName && $this->apiKey && $this->apiSecret;
+    }
+
     public function upload(UploadedFile $file, string $folder = 'projects'): ?string
     {
         $timestamp = time();
@@ -32,11 +37,14 @@ class CloudinaryService
         $params['api_key']   = $this->apiKey;
 
         $response = Http::asMultipart()
-            ->attach('file', fopen($file->getRealPath(), 'r'), $file->getClientOriginalName())
+            ->attach('file', $file->get(), $file->getClientOriginalName())
             ->post("{$this->baseUrl}/image/upload", $params);
 
         if ($response->failed()) {
-            \Log::error('Cloudinary upload failed', ['response' => $response->body()]);
+            \Log::error('Cloudinary upload failed', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+            ]);
             return null;
         }
 

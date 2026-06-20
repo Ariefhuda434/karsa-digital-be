@@ -50,6 +50,9 @@ class ProjectController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
+            if (!$this->cloudinary->credentialsValid()) {
+                return response()->json(['message' => 'Konfigurasi Cloudinary tidak lengkap.'], 500);
+            }
             $url = $this->cloudinary->upload($request->file('image'), 'karsa/projects');
             if (!$url) {
                 return response()->json(['message' => 'Gagal upload gambar ke Cloudinary.'], 500);
@@ -89,6 +92,9 @@ class ProjectController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
+            if (!$this->cloudinary->credentialsValid()) {
+                return response()->json(['message' => 'Konfigurasi Cloudinary tidak lengkap.'], 500);
+            }
             if ($project->image_path) {
                 $this->cloudinary->delete($project->image_path);
             }
