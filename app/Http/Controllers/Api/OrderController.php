@@ -9,6 +9,7 @@ class OrderController extends Controller
 {
     public function index()
     {
+        $orders = Order::latest()->get();
         return response()->json(Order::latest()->get());
     }
 
